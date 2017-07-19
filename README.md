@@ -11,10 +11,18 @@ Data cleaning involved grouping industries together, assiging a title score, cha
 
 ## Data Exploration & Visualization
 Plotting the target variables made it clear that there are more unconverted leads than converted leads.
+
+![target](/images/target.png)
+
 In looking at the lead source, we can see that Marketing generates more leads, and there is a higher percentage of Marketing leads that convert, whereas there are fewer converted Sales sourced leads. 
+
+![source](/images/source.png)
 
 When digging deeper and considering industry and source, we can see that Marketing leads with 'Other' industry tend to convert despite not being in one of the dominant industries whereas Sales 'Other' lead dont quite convert as much.
 Lastly, I noticed that company size seems to have a larger impact on Sales leads converting than on Marketing leads.
+
+![mktg_source](/images/mktg_source.png)
+
 
 ## Machine Learning models: *Decision Tree, Random Forest and Logistic Regression*
 
