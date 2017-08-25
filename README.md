@@ -32,6 +32,25 @@ I split the data into training and test sets using 85% of the data for model tra
 I chose to start by using a decision tree model because it is easy to interpret. 
 As a first pass, I explored feature importance without doing much parameter tuning, but instead initially set the maximum tree depth to 5 because I didn't want to build a very deep tree and overfit the training data. And, I chose to set the minimum sample split to 10 (there needs to be a minimum of 10 observations for there to be a split on a node). 
 
+```python
+
+X, y = shuffle(df_transformed, df_us.IsConverted_2 , random_state=23)
+
+'''
+FEATURE IMPORTANCE USING DECISION TREE
+'''
+# split data into training and test sets
+X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.15, random_state=1)
+
+
+# create decision tree model and fit to training data set to obtain feature importance
+tree_model = tree.DecisionTreeClassifier(criterion='gini', max_depth=5, min_samples_split=10,min_samples_leaf=5)
+#tree_model = tree.DecisionTreeClassifier()
+tree_model.fit(X_train, y_train)
+# predict test 
+tree_predicted = tree_model.predict(X_test)
+```
+
 In looking at the feature importance, the initial tree indicated that title score, lead source, marketing score, and owner were among the important features.
 
 | Feature Importance | Feature        |
@@ -46,8 +65,7 @@ In looking at the feature importance, the initial tree indicated that title scor
 
 Next, I used GridSearchCV to perform cross validation to do parameter tuning, to search for best tree depth and minimum sample split. The default cross validation sets k to 3, found minimum samples per split to be 5 and max depth of 3, and the best score was 82%.
 
-```
-python
+```python
 '''
     Cross validation using Grid Search - for best parameters
 '''
@@ -101,7 +119,7 @@ print "\nClassification Report:\n"
 print (classification_report(y_test, tree_predicted))
 
 # Confustion Matrix
-print "Confustion Matrix:" 
+print "Confusion Matrix:" 
 print(get_confusion_matrix(y_test, tree_predicted))
 
 print confusion_matrix(y_true=y_test,y_pred=tree_predicted)
@@ -118,7 +136,7 @@ Classification Report:
 |avg/total|   0.93    |  0.93  |  0.93    |  4959   |
 
 
-Confustion Matrix:
+Confusion Matrix:
 
 |                   | NotConverted-Predicted |  Converted-Predicted |
 |-------------------|------------------------|----------------------|
@@ -131,9 +149,96 @@ In comparison to the Random Forest and Logistic Regression, the tuned Decision T
 
 Using 80% training and 20% test set and 1500 estimators, the Random Forest model scored 98.6% accuracy
 
+```python
+'''
+Random Forest Classifier 
+'''
+X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.20, random_state=1)
+
+rf = RandomForestClassifier(n_estimators = 1500)
+rf.fit(X_train, y_train)
+rf_predicted = rf.predict(X_test)
+
+# Random Forest performance
+print "Random Forest score is: ", rf.score(X_test, y_test)
+
+# Classification Report
+print "\nClassification Report:\n"
+print (classification_report(y_test, rf_predicted))
+
+# Confustion Matrix
+print "Confusion Matrix:" 
+print(get_confusion_matrix(y_test, rf_predicted))
+```
+
+
+Random Forest score is:  0.986988847584
+
+Classification Report:
+
+| Class   | Precision | Recall | F1-Score | Support |
+| --------|-----------|--------|----------|---------|
+| 0       |   0.99    |  0.99  |  0.99    |  4401   |
+| 1       |   0.99    |  0.97  |  0.98    |  2055   |
+|avg/total|   0.99    |  0.99  |  0.99    |  6456   |
+
+
+Confusion Matrix:
+
+|                   | NotConverted-Predicted |  Converted-Predicted |
+|-------------------|------------------------|----------------------|
+NotConverted-Actual |           4378         |               23     |
+Converted-Actual    |            61          |              1994    |
+
+
+
 *Logistic Regression*
 
 Using 80% training and 20% test set, the Logistic Regression model scored 97.3% accuracy
+
+```python
+'''
+    Logistic Regression
+'''
+# training and testing
+X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.2, random_state=1)
+
+logreg = LogisticRegression(random_state=123, verbose=1)
+
+#Cs = np.logspace(-7, 5, num=15)
+logreg = LogisticRegression(C=10.0)
+logreg.fit(X_train,y_train)
+logreg_predicted = logreg.predict(X_test)
+# Logistic Regression performance
+print "\nC is ", c, "Logistic Regression score is: ", logreg.score(X_test, y_test)
+
+# Classification Report
+print "\nClassification Report:\n"
+print (classification_report(y_test, logreg_predicted))
+
+# Confustion Matrix
+print "Confusion Matrix:" 
+print(get_confusion_matrix(y_test, logreg_predicted))
+```
+
+C is  100000.0 Logistic Regression score is:  0.972893432466
+
+Classification Report:
+
+| Class   | Precision | Recall | F1-Score | Support |
+| --------|-----------|--------|----------|---------|
+| 0       |   0.98    |  0.99  |  0.98    |  4432   |
+| 1       |   0.97    |  0.95  |  0.96    |  2024   |
+|avg/total|   0.97    |  0.97  |  0.97    |  6456   |
+
+
+Confusion Matrix:
+
+|                   | NotConverted-Predicted |  Converted-Predicted |
+|-------------------|------------------------|----------------------|
+NotConverted-Actual |           4368         |               64     |
+Converted-Actual    |            111         |              1913    |
+
 
 ### Conclusion -  Model Summary
 While the tuned Decision Tree attributed more information gain to fewer features, the score was 93% and underperformed in comparison to the average scores 
